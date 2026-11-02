@@ -1,8 +1,18 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router";
+import { router } from "../router/router";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "../styles/index.css";
+import { Toaster } from "@/shared";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <h1>English Chat</h1>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <Toaster position="top-right" />
+    </QueryClientProvider>
   </StrictMode>,
 );
