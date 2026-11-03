@@ -1,3 +1,4 @@
+import { ProtectRoute } from "@/features/auth";
 import { Login } from "@/pages/login";
 import { Register } from "@/pages/register";
 import { Routes } from "@/shared";
@@ -17,11 +18,16 @@ export const router = createBrowserRouter([
     element: <Register />,
   },
   {
-    path: Routes.CHAT,
-    element: <h1>Chat</h1>,
-  },
-  {
-    path: Routes.PROFILE,
-    element: <h1>Profile</h1>,
+    element: <ProtectRoute />,
+    children: [
+      {
+        path: Routes.CHAT,
+        element: <h1>Chat</h1>,
+      },
+      {
+        path: Routes.PROFILE,
+        element: <h1>Profile</h1>,
+      },
+    ],
   },
 ]);

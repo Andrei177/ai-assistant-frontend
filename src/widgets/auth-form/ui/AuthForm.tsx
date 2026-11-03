@@ -1,4 +1,4 @@
-import { useLogin } from "@/features/login";
+import { useLogin, type LoginResponse } from "@/features/login";
 import {
   Button,
   Card,
@@ -13,9 +13,10 @@ import {
 } from "@/shared";
 import { useState, type SubmitEvent } from "react";
 import { toast } from "sonner";
-import { useRegister } from "@/features/register";
-import { Link } from "react-router";
+import { useRegister, type RegisterResponse } from "@/features/register";
+import { Link, useNavigate } from "react-router";
 import { AxiosError } from "axios";
+import { useAuthStore } from "@/features/auth";
 
 type Props = {
   isLogin: boolean;
@@ -27,17 +28,26 @@ export const AuthForm = ({ isLogin }: Props) => {
     password: "",
   });
 
+  const setUser = useAuthStore((state) => state.setUser);
+  const setAuthChecked = useAuthStore((state) => state.setAuthChecked);
+
+  const navigate = useNavigate();
+
   const loginMutate = useLogin();
   const registerMutate = useRegister();
 
   const isLoading = loginMutate.isPending || registerMutate.isPending;
 
-  const handleMutationSuccess = () => {
+  const handleMutationSuccess = (data: LoginResponse | RegisterResponse) => {
+    setUser(data.user);
+    setAuthChecked(true);
+
     if (isLogin) {
-      toast.success("Успешно вошли в акканут");
+      toast.success("Успешно вошли в аккаунт");
     } else {
       toast.success("Успешно зарегистрировались");
     }
+    navigate(Routes.CHAT);
   };
 
   const handleMutationError = (err: unknown) => {
