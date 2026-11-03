@@ -3,6 +3,7 @@ export { api } from "./config/api";
 export { injectAuthCallbacks } from "./config/api";
 export { Button } from "./ui/button";
 export { Input } from "./ui/input";
+export { Modal } from "./ui/modal";
 export { Toaster } from "./ui/sonner";
 export {
   Card,

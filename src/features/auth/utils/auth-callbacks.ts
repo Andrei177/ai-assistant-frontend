@@ -8,4 +8,5 @@ injectAuthCallbacks({
   onLogout: () => {
     useAuthStore.getState().logout();
   },
+  getAccessToken: () => useAuthStore.getState().token,
 });

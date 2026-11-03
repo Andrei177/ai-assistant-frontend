@@ -1,4 +1,5 @@
 import { ProtectRoute } from "@/features/auth";
+import { Chat } from "@/pages/chat";
 import { ProtectLayout } from "@/pages/layouts";
 import { Login } from "@/pages/login";
 import { Profile } from "@/pages/profile";
@@ -27,7 +28,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: Routes.CHAT,
-            element: <h1>Chat</h1>,
+            element: <Chat />,
           },
           {
             path: Routes.PROFILE,

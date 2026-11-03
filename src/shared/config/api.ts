@@ -9,13 +9,16 @@ export const api = axios.create({
 
 let onTokenRefresh: ((token: string) => void) | null = null;
 let onLogout: (() => void) | null = null;
+let getAccessToken: (() => string | null) | null = null;
 
 export const injectAuthCallbacks = (callbacks: {
   onTokenRefresh: (token: string) => void;
   onLogout: () => void;
+  getAccessToken: () => string | null;
 }) => {
   onTokenRefresh = callbacks.onTokenRefresh;
   onLogout = callbacks.onLogout;
+  getAccessToken = callbacks.getAccessToken;
 };
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
@@ -25,6 +28,16 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 interface RefreshResponse {
   accessToken: string;
 }
+
+api.interceptors.request.use((config) => {
+  if (getAccessToken) {
+    const token = getAccessToken();
+    if (token && config.headers) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,
