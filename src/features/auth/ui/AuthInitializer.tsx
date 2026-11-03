@@ -3,7 +3,10 @@ import { type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { userApi } from "@/entities/user";
 import { useAuthStore } from "../model/auth-store";
+import { initializeAuthCallbacks } from "../utils/auth-callbacks";
 import { toast } from "sonner";
+
+initializeAuthCallbacks();
 
 type Props = {
   children: ReactNode;

@@ -30,6 +30,7 @@ export const AuthForm = ({ isLogin }: Props) => {
 
   const setUser = useAuthStore((state) => state.setUser);
   const setAuthChecked = useAuthStore((state) => state.setAuthChecked);
+  const setToken = useAuthStore((state) => state.setToken);
 
   const navigate = useNavigate();
 
@@ -40,6 +41,7 @@ export const AuthForm = ({ isLogin }: Props) => {
 
   const handleMutationSuccess = (data: LoginResponse | RegisterResponse) => {
     setUser(data.user);
+    setToken(data.accessToken);
     setAuthChecked(true);
 
     if (isLogin) {
