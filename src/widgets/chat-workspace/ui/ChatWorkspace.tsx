@@ -3,6 +3,7 @@ import { ChatList, type Chat } from "@/entities/chat";
 import { MessageList } from "@/entities/message";
 import { DeleteChat } from "@/features/delete-chat";
 import { RenameChat } from "@/features/rename-chat";
+import { CreateChat } from "@/features/create-chat";
 
 export const ChatWorkspace = () => {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
@@ -25,6 +26,7 @@ export const ChatWorkspace = () => {
             />
           </>
         )}
+        createAction={() => <CreateChat />}
       />
       <section
         aria-label="Сообщения"

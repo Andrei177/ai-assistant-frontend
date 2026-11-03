@@ -1,9 +1,10 @@
 import { Edit01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { Button, Input, Modal } from "@/shared";
 import type { Chat } from "@/entities/chat";
 import { useRenameChat } from "../utils/use-rename-chat";
+import { toast } from "sonner";
 
 type RenameChatProps = {
   chat: Chat;
@@ -19,14 +20,19 @@ export const RenameChat = ({ chat }: RenameChatProps) => {
     setIsOpen(open);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
     const trimmedChatName = chatName.trim();
     if (!trimmedChatName) return;
 
     renameChat.mutate(
       { chatId: chat.chatId, request: { chatName: trimmedChatName } },
-      { onSuccess: () => setIsOpen(false) },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          toast.success("Переименование прошло успешно");
+        },
+      },
     );
   };
 
@@ -53,7 +59,10 @@ export const RenameChat = ({ chat }: RenameChatProps) => {
         title="Изменить название чата"
         description="Введите новое название для чата."
       >
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <form
+          onSubmit={(event) => handleSubmit(event.nativeEvent)}
+          className="grid gap-4"
+        >
           <label htmlFor={`chat-name-${chat.chatId}`} className="sr-only">
             Название чата
           </label>

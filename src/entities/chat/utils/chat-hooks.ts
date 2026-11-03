@@ -1,10 +1,6 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { chatApi } from "../api/chat-api";
-import type { ChatPageParams, CreateChatRequest } from "../model/types";
+import type { ChatPageParams } from "../model/types";
 
 export const chatKeys = {
   all: ["chats"] as const,
@@ -26,12 +22,3 @@ export const useChat = (chatId: number) =>
     queryFn: () => chatApi.getChat(chatId),
     enabled: Number.isFinite(chatId) && chatId > 0,
   });
-
-export const useCreateChat = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (request: CreateChatRequest) => chatApi.createChat(request),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: chatKeys.lists() }),
-  });
-};
