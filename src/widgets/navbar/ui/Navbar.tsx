@@ -27,7 +27,7 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:py-4">
-        <span className="text-center text-base font-semibold sm:text-left">
+        <span className="text-center text-base font-semibold hover:cursor-[url('heart.svg')_16_16,pointer] sm:text-left">
           AI English Chat
         </span>
         <nav

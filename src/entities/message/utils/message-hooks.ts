@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { messageApi } from "../api/message-api";
 import type {
   HandleVoiceMessageRequest,
@@ -16,11 +12,10 @@ export const messageKeys = {
   list: (chatId: number, params?: MessagePageParams) =>
     [...messageKeys.lists(), chatId, params] as const,
   details: () => [...messageKeys.all, "detail"] as const,
-  detail: (messageId: number) =>
-    [...messageKeys.details(), messageId] as const,
+  detail: (messageId: number) => [...messageKeys.details(), messageId] as const,
   feedback: (messageId: number) =>
     [...messageKeys.all, "feedback", messageId] as const,
-  audio: (messageId: number, range?: string) =>
+  audio: (messageId: number | string, range?: string) =>
     range
       ? ([...messageKeys.all, "audio", messageId, range] as const)
       : ([...messageKeys.all, "audio", messageId] as const),
@@ -50,11 +45,11 @@ export const useMessageFeedback = (messageId: number) =>
     enabled: Number.isFinite(messageId) && messageId > 0,
   });
 
-export const useMessageAudio = (messageId: number, range?: string) =>
+export const useMessageAudio = (messageId: number | string, range?: string) =>
   useQuery({
     queryKey: messageKeys.audio(messageId, range),
     queryFn: () => messageApi.getAudio(messageId, range),
-    enabled: Number.isFinite(messageId) && messageId > 0,
+    enabled: Number.isFinite(messageId) && Number(messageId) > 0,
   });
 
 export const useTranslateMessage = () =>

@@ -10,7 +10,7 @@ type MessageProps = {
 };
 
 type AudioPlayerProps = {
-  messageId: number;
+  messageId: number | string;
 };
 
 const formatMessageTime = (createdAt: string) => {

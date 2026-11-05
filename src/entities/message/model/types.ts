@@ -2,13 +2,15 @@ export type MessageContentType = "TEXT" | "VOICE";
 export type MessageRole = "USER" | "ASSISTANT";
 
 export type Message = {
-  messageId: number;
+  messageId: number | string;
+  chatId: number;
   content: string;
   contentType: MessageContentType;
   audioUrl: string | null;
   role: MessageRole;
   transcription: string | null;
   createdAt: string;
+  isStreaming: boolean;
 };
 
 export type MessageFeedback = {
@@ -83,3 +85,29 @@ export type MessageAudio = {
   contentRange: string | null;
   acceptRanges: string | null;
 };
+
+export const WebSocketMessageTypes = {
+  AUTH: "AUTH",
+  AUTH_OK: "AUTH_OK",
+  AUTH_FAILED: "AUTH_FAILED",
+  SEND_MESSAGE: "SEND_MESSAGE",
+  MESSAGE_ACCEPTED: "MESSAGE_ACCEPTED",
+  MESSAGE_STREAM: "MESSAGE_STREAM",
+  MESSAGE_STREAM_COMPLETED: "MESSAGE_STREAM_COMPLETED",
+  ERROR: "ERROR",
+} as const;
+
+export type WebSocketMessageType =
+  (typeof WebSocketMessageTypes)[keyof typeof WebSocketMessageTypes];
+
+export const WebSocketErrorCodes = {
+  MALFORMED_JSON: "MALFORMED_JSON",
+  INVALID_MESSAGE: "INVALID_MESSAGE",
+  UNKNOWN_TYPE: "UNKNOWN_TYPE",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  INVALID_TOKEN: "INVALID_TOKEN",
+};
+
+export type WebSocketErrorCode =
+  (typeof WebSocketErrorCodes)[keyof typeof WebSocketErrorCodes];

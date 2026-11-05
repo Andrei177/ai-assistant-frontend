@@ -28,9 +28,7 @@ export const messageApi = {
     return response.data;
   },
 
-  getMessageFeedback: async (
-    messageId: number,
-  ): Promise<MessageFeedback> => {
+  getMessageFeedback: async (messageId: number): Promise<MessageFeedback> => {
     const response = await api.get<MessageFeedback>(
       `/v1/messages/${messageId}/feedback`,
     );
@@ -64,7 +62,7 @@ export const messageApi = {
   },
 
   getAudio: async (
-    messageId: number,
+    messageId: number | string,
     range?: string,
   ): Promise<MessageAudio> => {
     const response = await api.get<Blob>(`/v1/messages/${messageId}/audio`, {

@@ -11,7 +11,10 @@ export type {
   MessageRole,
   TranslateRequest,
   TranslateResponse,
+  WebSocketMessageType,
+  WebSocketErrorCode,
 } from "./model/types";
+export { WebSocketMessageTypes, WebSocketErrorCodes } from "./model/types";
 export {
   messageKeys,
   useHandleVoiceMessage,
