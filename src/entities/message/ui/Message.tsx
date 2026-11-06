@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { SpeechToTextIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@/shared";
@@ -7,6 +8,7 @@ import { useMessageAudio } from "../utils/message-hooks";
 
 type MessageProps = {
   message: MessageData;
+  translation?: ReactNode;
 };
 
 type AudioPlayerProps = {
@@ -82,7 +84,7 @@ const AudioPlayer = ({ messageId }: AudioPlayerProps) => {
   );
 };
 
-export const Message = ({ message }: MessageProps) => {
+export const Message = ({ message, translation }: MessageProps) => {
   const isAudio = message.contentType === "VOICE";
   const isUserMessage = message.role === "USER";
   const [shouldLoadAudio, setShouldLoadAudio] = useState(false);
@@ -141,9 +143,12 @@ export const Message = ({ message }: MessageProps) => {
             )}
           </div>
         ) : (
-          <p className="wrap-break-word whitespace-pre-wrap text-sm">
-            {message.content}
-          </p>
+          <div className="grid gap-2">
+            <p className="wrap-break-word whitespace-pre-wrap text-sm">
+              {message.content}
+            </p>
+            {translation}
+          </div>
         )}
         {messageTime && (
           <time

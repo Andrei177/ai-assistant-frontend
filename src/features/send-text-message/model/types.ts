@@ -6,3 +6,5 @@ export type MessageDto = {
   content: string;
   contentType: "TEXT";
 };
+
+export type SendMessageResult = "sent" | "empty" | "unavailable";

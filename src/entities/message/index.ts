@@ -17,12 +17,12 @@ export type {
 export { WebSocketMessageTypes, WebSocketErrorCodes } from "./model/types";
 export {
   messageKeys,
+  useInfiniteMessagesByChatId,
   useHandleVoiceMessage,
   useMessage,
   useMessageAudio,
   useMessageFeedback,
   useMessagesByChatId,
-  useTranslateMessage,
 } from "./utils/message-hooks";
 export { Message } from "./ui/Message";
 export { MessageList } from "./ui/MessageList";

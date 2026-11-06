@@ -1,9 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { messageApi } from "../api/message-api";
 import type {
   HandleVoiceMessageRequest,
   MessagePageParams,
-  TranslateRequest,
 } from "../model/types";
 
 export const messageKeys = {
@@ -11,6 +15,8 @@ export const messageKeys = {
   lists: () => [...messageKeys.all, "list"] as const,
   list: (chatId: number, params?: MessagePageParams) =>
     [...messageKeys.lists(), chatId, params] as const,
+  infiniteList: (chatId: number, params?: MessagePageParams) =>
+    [...messageKeys.lists(), chatId, params, "infinite"] as const,
   details: () => [...messageKeys.all, "detail"] as const,
   detail: (messageId: number) => [...messageKeys.details(), messageId] as const,
   feedback: (messageId: number) =>
@@ -28,6 +34,20 @@ export const useMessagesByChatId = (
   useQuery({
     queryKey: messageKeys.list(chatId, params),
     queryFn: () => messageApi.getMessagesByChatId(chatId, params),
+    enabled: Number.isFinite(chatId) && chatId > 0,
+  });
+
+export const useInfiniteMessagesByChatId = (
+  chatId: number,
+  params?: MessagePageParams,
+) =>
+  useInfiniteQuery({
+    queryKey: messageKeys.infiniteList(chatId, params),
+    initialPageParam: params?.page ?? 0,
+    queryFn: ({ pageParam }) =>
+      messageApi.getMessagesByChatId(chatId, { ...params, page: pageParam }),
+    getNextPageParam: (lastPage) =>
+      lastPage.last ? undefined : lastPage.number + 1,
     enabled: Number.isFinite(chatId) && chatId > 0,
   });
 
@@ -50,17 +70,6 @@ export const useMessageAudio = (messageId: number | string, range?: string) =>
     queryKey: messageKeys.audio(messageId, range),
     queryFn: () => messageApi.getAudio(messageId, range),
     enabled: Number.isFinite(messageId) && Number(messageId) > 0,
-  });
-
-export const useTranslateMessage = () =>
-  useMutation({
-    mutationFn: ({
-      messageId,
-      request,
-    }: {
-      messageId: number;
-      request: TranslateRequest;
-    }) => messageApi.translateMessage(messageId, request),
   });
 
 export const useHandleVoiceMessage = () => {

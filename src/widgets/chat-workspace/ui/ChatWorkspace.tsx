@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { ChatList, type Chat } from "@/entities/chat";
+import { ChatList, chatKeys, useChat } from "@/entities/chat";
+import type { InfiniteData } from "@tanstack/react-query";
 import {
   messageKeys,
   MessageList,
@@ -12,6 +13,7 @@ import { DeleteChat } from "@/features/delete-chat";
 import { RenameChat } from "@/features/rename-chat";
 import { CreateChat } from "@/features/create-chat";
 import { ChatInput } from "@/features/send-text-message";
+import { TranslateMessage } from "@/features/translate-message";
 import { useAuthStore } from "@/features/auth";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -19,17 +21,25 @@ const messageParams: MessagePageParams = {
   sort: "createdAt,desc",
 };
 
+const updateLatestMessagePage = (
+  data: InfiniteData<MessagePage> | undefined,
+  update: (page: MessagePage) => MessagePage,
+) => {
+  if (!data || data.pages.length === 0) return data;
+
+  return {
+    ...data,
+    pages: data.pages.map((page, index) => (index === 0 ? update(page) : page)),
+  };
+};
+
 export const ChatWorkspace = () => {
-  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const { data: selectedChatData } = useChat(selectedChatId ?? 0);
+  const selectedChat = selectedChatData ?? null;
   const token = useAuthStore((state) => state.token);
   //const [status, setStatus] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-
-  const selectedChatRef = useRef<Chat | null>(null);
-
-  useEffect(() => {
-    selectedChatRef.current = selectedChat;
-  }, [selectedChat]);
 
   const queryClient = useQueryClient();
 
@@ -48,60 +58,6 @@ export const ChatWorkspace = () => {
       );
     };
 
-    //   const data = JSON.parse(event.data);
-    //   if (
-    //     data.type === WebSocketMessageTypes.MESSAGE_ACCEPTED &&
-    //     selectedChatRef.current?.chatId
-    //   ) {
-    //     const newMessage: MessageType = data.message;
-    //     queryClient.setQueryData(
-    //       messageKeys.list(selectedChatRef.current.chatId, messageParams),
-    //       (messages: MessagePage) => {
-    //         const clone = structuredClone(messages);
-
-    //         clone.content.unshift(newMessage);
-    //         return clone;
-    //       },
-    //     );
-    //   }
-    //   if (
-    //     data.type === WebSocketMessageTypes.MESSAGE_STREAM &&
-    //     selectedChatRef.current?.chatId
-    //   ) {
-    //     setLlmMessage((prev) => ({
-    //       ...prev,
-    //       content: prev.content + data.token,
-    //     }));
-    //   }
-    //   if (
-    //     data.type === WebSocketMessageTypes.MESSAGE_STREAM_COMPLETED &&
-    //     selectedChatRef.current?.chatId
-    //   ) {
-    //     queryClient.setQueryData(
-    //       messageKeys.list(selectedChatRef.current.chatId, messageParams),
-    //       (messages: MessagePage) => {
-    //         if (!messages) return messages;
-    //         const clone = structuredClone(messages);
-    //         clone.content.unshift({
-    //           ...data.message,
-    //         });
-    //         return clone;
-    //       },
-    //     );
-    //     setLlmMessage({
-    //       messageId: 0,
-    //       audioUrl: "",
-    //       chatId: 0,
-    //       content: "",
-    //       contentType: "TEXT",
-    //       createdAt: "",
-    //       role: "ASSISTANT",
-    //       transcription: "",
-    //     });
-    //   }
-    //   console.log("Пришло по WS соединению");
-    //   console.log(data);
-    // };
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       const chatId = data.chatId || data.message?.chatId;
@@ -111,37 +67,44 @@ export const ChatWorkspace = () => {
 
       if (!chatId) return;
 
-      const targetQueryKey = messageKeys.list(chatId, messageParams);
+      const targetQueryKey = messageKeys.infiniteList(chatId, messageParams);
 
       if (data.type === WebSocketMessageTypes.MESSAGE_ACCEPTED) {
         queryClient.setQueryData(
           targetQueryKey,
-          (old: MessagePage | undefined) => {
-            if (!old) return old;
-            const clone = structuredClone(old);
-            clone.content.unshift(data.message);
-            return clone;
-          },
+          (old: InfiniteData<MessagePage> | undefined) =>
+            updateLatestMessagePage(old, (page) => ({
+              ...page,
+              content: [data.message, ...page.content],
+            })),
         );
       }
 
       if (data.type === WebSocketMessageTypes.MESSAGE_STREAM) {
         queryClient.setQueryData(
           targetQueryKey,
-          (old: MessagePage | undefined) => {
-            if (!old) return { content: [] };
-            const clone = structuredClone(old);
+          (old: InfiniteData<MessagePage> | undefined) =>
+            updateLatestMessagePage(old, (page) => {
+              const firstMessage = page.content[0];
 
-            const firstMessage = clone.content[0];
+              if (
+                firstMessage &&
+                firstMessage.isStreaming &&
+                firstMessage.messageId === `stream-${chatId}`
+              ) {
+                return {
+                  ...page,
+                  content: [
+                    {
+                      ...firstMessage,
+                      content: firstMessage.content + data.token,
+                    },
+                    ...page.content.slice(1),
+                  ],
+                };
+              }
 
-            if (
-              firstMessage &&
-              firstMessage.isStreaming &&
-              firstMessage.messageId === `stream-${chatId}`
-            ) {
-              firstMessage.content += data.token;
-            } else {
-              const streamingMessage: MessageType & { isStreaming: boolean } = {
+              const streamingMessage: MessageType = {
                 messageId: `stream-${chatId}`,
                 content: data.token,
                 contentType: "TEXT",
@@ -149,30 +112,31 @@ export const ChatWorkspace = () => {
                 role: "ASSISTANT",
                 transcription: null,
                 createdAt: new Date().toISOString(),
-                chatId: chatId,
+                chatId,
                 isStreaming: true,
               };
-              clone.content.unshift(streamingMessage);
-            }
-            return clone;
-          },
+
+              return {
+                ...page,
+                content: [streamingMessage, ...page.content],
+              };
+            }),
         );
       }
 
       if (data.type === WebSocketMessageTypes.MESSAGE_STREAM_COMPLETED) {
         queryClient.setQueryData(
           targetQueryKey,
-          (old: MessagePage | undefined) => {
-            if (!old) return old;
-            const clone = structuredClone(old);
-
-            clone.content = clone.content.filter(
-              (msg) => msg.messageId !== `stream-${chatId}`,
-            );
-
-            clone.content.unshift(data.message);
-            return clone;
-          },
+          (old: InfiniteData<MessagePage> | undefined) =>
+            updateLatestMessagePage(old, (page) => ({
+              ...page,
+              content: [
+                data.message,
+                ...page.content.filter(
+                  (message) => message.messageId !== `stream-${chatId}`,
+                ),
+              ],
+            })),
         );
       }
     };
@@ -193,16 +157,19 @@ export const ChatWorkspace = () => {
   return (
     <div className="grid h-[calc(100dvh-11rem)] min-h-80 grid-rows-[minmax(0,0.4fr)_minmax(0,0.6fr)] gap-4 overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-1">
       <ChatList
-        selectedChatId={selectedChat?.chatId ?? null}
-        onSelectChat={setSelectedChat}
+        selectedChatId={selectedChatId}
+        onSelectChat={(chat) => {
+          queryClient.setQueryData(chatKeys.detail(chat.chatId), chat);
+          setSelectedChatId(chat.chatId);
+        }}
         renderActions={(chat) => (
           <>
             <RenameChat chat={chat} />
             <DeleteChat
               chat={chat}
               onDeleted={(chatId) => {
-                if (selectedChat?.chatId === chatId) {
-                  setSelectedChat(null);
+                if (selectedChatId === chatId) {
+                  setSelectedChatId(null);
                 }
               }}
             />
@@ -226,6 +193,9 @@ export const ChatWorkspace = () => {
                 <MessageList
                   chatId={selectedChat.chatId}
                   params={messageParams}
+                  renderTranslation={(messageId) => (
+                    <TranslateMessage messageId={messageId} />
+                  )}
                 />
               </div>
             </>
