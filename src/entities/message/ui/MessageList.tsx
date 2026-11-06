@@ -9,12 +9,14 @@ type MessageListProps = {
   chatId: number;
   params?: MessagePageParams;
   renderTranslation?: (messageId: number) => ReactNode;
+  renderFeedback?: (messageId: number) => ReactNode;
 };
 
 export const MessageList = ({
   chatId,
   params,
   renderTranslation,
+  renderFeedback,
 }: MessageListProps) => {
   const {
     data,
@@ -143,10 +145,15 @@ export const MessageList = ({
               key={message.messageId}
               message={message}
               translation={
-                message.contentType === "TEXT" &&
+                !message.isStreaming && typeof message.messageId === "number"
+                  ? renderTranslation?.(message.messageId)
+                  : undefined
+              }
+              feedback={
+                message.role === "USER" &&
                 !message.isStreaming &&
                 typeof message.messageId === "number"
-                  ? renderTranslation?.(message.messageId)
+                  ? renderFeedback?.(message.messageId)
                   : undefined
               }
             />

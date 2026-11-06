@@ -19,8 +19,6 @@ export const messageKeys = {
     [...messageKeys.lists(), chatId, params, "infinite"] as const,
   details: () => [...messageKeys.all, "detail"] as const,
   detail: (messageId: number) => [...messageKeys.details(), messageId] as const,
-  feedback: (messageId: number) =>
-    [...messageKeys.all, "feedback", messageId] as const,
   audio: (messageId: number | string, range?: string) =>
     range
       ? ([...messageKeys.all, "audio", messageId, range] as const)
@@ -55,13 +53,6 @@ export const useMessage = (messageId: number) =>
   useQuery({
     queryKey: messageKeys.detail(messageId),
     queryFn: () => messageApi.getMessageById(messageId),
-    enabled: Number.isFinite(messageId) && messageId > 0,
-  });
-
-export const useMessageFeedback = (messageId: number) =>
-  useQuery({
-    queryKey: messageKeys.feedback(messageId),
-    queryFn: () => messageApi.getMessageFeedback(messageId),
     enabled: Number.isFinite(messageId) && messageId > 0,
   });
 

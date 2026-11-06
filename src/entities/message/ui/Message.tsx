@@ -9,6 +9,7 @@ import { useMessageAudio } from "../utils/message-hooks";
 type MessageProps = {
   message: MessageData;
   translation?: ReactNode;
+  feedback?: ReactNode;
 };
 
 type AudioPlayerProps = {
@@ -84,7 +85,7 @@ const AudioPlayer = ({ messageId }: AudioPlayerProps) => {
   );
 };
 
-export const Message = ({ message, translation }: MessageProps) => {
+export const Message = ({ message, translation, feedback }: MessageProps) => {
   const isAudio = message.contentType === "VOICE";
   const isUserMessage = message.role === "USER";
   const [shouldLoadAudio, setShouldLoadAudio] = useState(false);
@@ -143,13 +144,14 @@ export const Message = ({ message, translation }: MessageProps) => {
             )}
           </div>
         ) : (
-          <div className="grid gap-2">
-            <p className="wrap-break-word whitespace-pre-wrap text-sm">
-              {message.content}
-            </p>
-            {translation}
-          </div>
+          <p className="wrap-break-word whitespace-pre-wrap text-sm">
+            {message.content}
+          </p>
         )}
+        <div className="flex items-start gap-1 ">
+          {feedback}
+          {translation}
+        </div>
         {messageTime && (
           <time
             dateTime={message.createdAt}

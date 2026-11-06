@@ -14,6 +14,7 @@ import { RenameChat } from "@/features/rename-chat";
 import { CreateChat } from "@/features/create-chat";
 import { ChatInput } from "@/features/send-text-message";
 import { TranslateMessage } from "@/features/translate-message";
+import { GetFeedbackForMessage } from "@/features/get-feedback-for-message";
 import { useAuthStore } from "@/features/auth";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -155,7 +156,7 @@ export const ChatWorkspace = () => {
   }, [token, queryClient]);
 
   return (
-    <div className="grid h-[calc(100dvh-11rem)] min-h-80 grid-rows-[minmax(0,0.4fr)_minmax(0,0.6fr)] gap-4 overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-1">
+    <div className="grid h-[calc(100dvh-8rem)] min-h-80 grid-rows-[minmax(0,0.25fr)_minmax(0,0.75fr)] gap-4 overflow-hidden lg:grid-cols-[18rem_minmax(0,1fr)] lg:grid-rows-1">
       <ChatList
         selectedChatId={selectedChatId}
         onSelectChat={(chat) => {
@@ -195,6 +196,9 @@ export const ChatWorkspace = () => {
                   params={messageParams}
                   renderTranslation={(messageId) => (
                     <TranslateMessage messageId={messageId} />
+                  )}
+                  renderFeedback={(messageId) => (
+                    <GetFeedbackForMessage messageId={messageId} />
                   )}
                 />
               </div>

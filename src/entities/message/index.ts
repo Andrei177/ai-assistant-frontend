@@ -21,7 +21,6 @@ export {
   useHandleVoiceMessage,
   useMessage,
   useMessageAudio,
-  useMessageFeedback,
   useMessagesByChatId,
 } from "./utils/message-hooks";
 export { Message } from "./ui/Message";
