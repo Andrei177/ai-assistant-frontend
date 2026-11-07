@@ -1,20 +1,18 @@
 import { UserCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 import { useAuthStore } from "@/features/auth";
-import { Card, CardContent } from "@/shared";
-
-const formatRegistrationDate = (createdAt: string) => {
-  const date = new Date(createdAt);
-
-  if (Number.isNaN(date.getTime())) {
-    return "Дата не указана";
-  }
-
-  return new Intl.DateTimeFormat("ru-RU", { dateStyle: "long" }).format(date);
-};
+import { Card, CardContent, Routes } from "@/shared";
+import { DeleteAccount } from "@/features/delete-account";
+import { ManageSessions } from "@/features/manage-sessions";
+import { formatRegistrationDate } from "../utils/format-registration-date";
 
 export const Profile = () => {
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   if (!user) {
     return (
@@ -25,7 +23,7 @@ export const Profile = () => {
   }
 
   return (
-    <section className="mx-auto w-full max-w-xl">
+    <section className="mx-auto grid w-full max-w-2xl gap-6">
       <Card>
         <CardContent className="flex flex-col items-center gap-6 py-8 sm:py-10">
           <HugeiconsIcon
@@ -54,6 +52,17 @@ export const Profile = () => {
           </dl>
         </CardContent>
       </Card>
+      <ManageSessions
+        onAllSessionsEnded={() => {
+          logout();
+          queryClient.setQueryData(["auth-user"], null);
+          queryClient.removeQueries({
+            predicate: (query) => query.queryKey[0] !== "auth-user",
+          });
+          navigate(Routes.LOGIN, { replace: true });
+        }}
+      />
+      <DeleteAccount />
     </section>
   );
 };
