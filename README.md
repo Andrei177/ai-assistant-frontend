@@ -80,6 +80,31 @@ npm ci
 npm run dev
 ```
 
+### Настройка окружения
+
+Перед запуском создайте в корне проекта файл `.env` на основе `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+Для PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Укажите адрес HTTP API в `VITE_API_URL` и адрес WebSocket чата в `VITE_WS_URL`.
+Например, для локального backend:
+
+```dotenv
+VITE_API_URL=http://localhost:8080/api
+VITE_WS_URL=ws://localhost:8080/ws/chats
+```
+
+Переменные с префиксом `VITE_` доступны клиентскому приложению. Не храните в
+них секреты. После изменения `.env` перезапустите Vite dev-сервер.
+
 ### Проверки и production-сборка
 
 ```bash

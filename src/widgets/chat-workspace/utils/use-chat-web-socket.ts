@@ -26,7 +26,7 @@ export const useChatWebSocket = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const ws = new WebSocket("http://localhost:8080/ws/chats");
+    const ws = new WebSocket(import.meta.env.VITE_WS_URL);
     wsRef.current = ws;
 
     ws.onopen = () => {
