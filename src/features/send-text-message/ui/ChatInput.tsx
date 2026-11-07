@@ -2,6 +2,7 @@ import { Button, Input } from "@/shared";
 import { Send } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, type RefObject } from "react";
+import type { ReactNode } from "react";
 import { useSendMessage } from "../utils/use-send-message";
 import type { Chat } from "@/entities/chat";
 import { WebSocketMessageTypes } from "@/entities/message";
@@ -9,9 +10,10 @@ import { WebSocketMessageTypes } from "@/entities/message";
 type Props = {
   wsRef: RefObject<WebSocket | null>;
   selectedChat: Chat | null;
+  rightAction?: ReactNode;
 };
 
-export const ChatInput = ({ wsRef, selectedChat }: Props) => {
+export const ChatInput = ({ wsRef, selectedChat, rightAction }: Props) => {
   const [textMessage, setTextMessage] = useState("");
   const [sendError, setSendError] = useState(false);
 
@@ -34,8 +36,9 @@ export const ChatInput = ({ wsRef, selectedChat }: Props) => {
 
   return (
     <div className="grid gap-2">
-      <div className="flex text-center">
+      <div className="flex items-center gap-1 text-center">
         <Input
+          className="min-w-0 flex-1"
           aria-label="Элемент для ввода сообщения"
           placeholder="Текст сообщения"
           value={textMessage}
@@ -62,6 +65,7 @@ export const ChatInput = ({ wsRef, selectedChat }: Props) => {
         >
           <HugeiconsIcon icon={Send} aria-hidden="true" />
         </Button>
+        {rightAction}
       </div>
       {sendError && (
         <p role="alert" className="px-2 text-sm text-destructive">

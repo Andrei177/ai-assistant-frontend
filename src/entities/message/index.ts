@@ -25,3 +25,6 @@ export {
 } from "./utils/message-hooks";
 export { Message } from "./ui/Message";
 export { MessageList } from "./ui/MessageList";
+export { AudioPlayer } from "./ui/AudioPlayer";
+export { formatMessageTime } from "./utils/format-message-time";
+export { updateLatestMessagePage } from "./utils/update-latest-message-page";

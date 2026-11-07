@@ -7,6 +7,8 @@ export type Message = {
   content: string;
   contentType: MessageContentType;
   audioUrl: string | null;
+  audioFile?: File;
+  isSending?: boolean;
   role: MessageRole;
   transcription: string | null;
   createdAt: string;
